@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/Vadim-Makhnev/apiserver/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -13,6 +14,7 @@ type APIServer struct {
 	config *Config
 	logger *logrus.Logger
 	router *mux.Router
+	store  *store.Store
 }
 
 // NewAPIServer creates a new APIServer
@@ -30,9 +32,11 @@ func (s *APIServer) Start() error {
 		return err
 	}
 
+	s.configureRouter()
+
 	s.logger.Info("Starting api server")
 
-	return nil
+	return http.ListenAndServe(s.config.BindAddr, s.router)
 }
 
 func (s *APIServer) configureLogger() error {
@@ -41,11 +45,9 @@ func (s *APIServer) configureLogger() error {
 		return err
 	}
 
-	s.configureRouter()
-
 	s.logger.SetLevel(level)
 
-	return http.ListenAndServe(s.config.BindAddr, s.router)
+	return nil
 }
 
 func (s *APIServer) configureRouter() {
