@@ -4,6 +4,6 @@ build:
 
 .PHONY: test
 test:
-	go test -v -race -timeout 30s ./...
+	CGO_ENABLED=1 go test -v -race -timeout 30s ./...
 
 .DEFAULT_GOAL := build
