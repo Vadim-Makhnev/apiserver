@@ -1,3 +1,4 @@
 .env
 configs/apiserver.toml
 .vscode/
+apiserver
