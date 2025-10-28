@@ -16,6 +16,21 @@ func init() {
 	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config file")
 }
 
+// @title My API
+// @version 1.0
+// @description This is a sample API with user authentication
+// @host localhost:8080
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token for authentication
+
+// @contact.name API Support
+// @contact.email support@example.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
 func main() {
 	flag.Parse()
 

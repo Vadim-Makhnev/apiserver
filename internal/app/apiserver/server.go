@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/Vadim-Makhnev/apiserver/cmd/apiserver/docs"
 	"github.com/Vadim-Makhnev/apiserver/internal/app/model"
 	"github.com/Vadim-Makhnev/apiserver/internal/app/store"
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -57,6 +59,7 @@ func (s *server) configureRouter() {
 	s.router.Use(s.setRequestID)
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+	s.router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
 	s.router.HandleFunc("/sessions", s.handleSessionsCreate()).Methods("POST")
 
@@ -116,12 +119,33 @@ func (s *server) authenticateUser(next http.Handler) http.Handler {
 	})
 }
 
+// Whoami godoc
+// @Summary Get current user info
+// @Description Get information about currently authenticated user
+// @Tags private
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} model.User "User information"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /private/whoami [get]
 func (s *server) handleWhoami() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*model.User))
 	}
 }
 
+// CreateUser godoc
+// @Summary Create new user
+// @Description Create a new user with email and password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param email body string true "User email" example("user@example.com")
+// @Param password body string true "User password" example("securepassword123")
+// @Success 201 {object} model.User "User created successfully"
+// @Failure 400 {object} map[string]string "Invalid JSON"
+// @Failure 422 {object} map[string]string "Unprocessable entity"
+// @Router /users [post]
 func (s *server) handleUsersCreate() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
@@ -149,6 +173,18 @@ func (s *server) handleUsersCreate() http.HandlerFunc {
 	}
 }
 
+// CreateSession godoc
+// @Summary Create session (login)
+// @Description Authenticate user and create session
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param email body string true "User email" example("user@example.com")
+// @Param password body string true "User password" example("securepassword123")
+// @Success 200 {object} model.User "Authentication successful"
+// @Failure 400 {object} map[string]string "Invalid JSON"
+// @Failure 401 {object} map[string]string "Invalid credentials"
+// @Router /sessions [post]
 func (s *server) handleSessionsCreate() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
