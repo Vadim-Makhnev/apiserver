@@ -32,7 +32,7 @@ RESTful API для управления пользователями, напис
 ```sql
 CREATE DATABASE IF NOT EXISTS restapi;
 CREATE USER restapi WITH PASSWORD 'admin';
-GRANT ALL PRIVILEGES ON DATABASE restapi TO restapi;
+ALTER DATABASE restapi OWNER TO restapi;
 ```
 ```bash
 migrate -path migrations -database "postgres://restapi:admin@localhost:5432/restapi?sslmode=disable" up
